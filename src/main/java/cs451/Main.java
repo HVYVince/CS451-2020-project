@@ -52,17 +52,17 @@ public class Main {
 
         Coordinator coordinator = new Coordinator(parser.myId(), parser.barrierIp(), parser.barrierPort(), parser.signalIp(), parser.signalPort());
 
-	System.out.println("Waiting for all processes for finish initialization");
+	    System.out.println("Waiting for all processes for finish initialization");
         coordinator.waitOnBarrier();
 
-	System.out.println("Broadcasting messages...");
+        System.out.println("Broadcasting messages...");
 
-	System.out.println("Signaling end of broadcasting messages");
+        System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();
 
-	while (true) {
-	    // Sleep for 1 hour
-	    Thread.sleep(60 * 60 * 1000);
-	}
+        while (true) {
+            // Sleep for 1 hour
+            Thread.sleep(60 * 60 * 1000);
+        }
     }
 }
