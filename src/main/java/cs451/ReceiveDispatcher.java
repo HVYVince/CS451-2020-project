@@ -2,9 +2,7 @@ package cs451;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 
 public class ReceiveDispatcher implements Runnable {
@@ -12,6 +10,7 @@ public class ReceiveDispatcher implements Runnable {
 	private boolean run = true;
 	private Parser parser;
 	private HashMap<Integer, PerfectLink> links;
+	private ArrayList<Registerable> registered;
 	
 	ReceiveDispatcher(DatagramSocket socket, Parser parser, HashMap<Integer, PerfectLink> links) {
 		this.socket = socket;
@@ -21,6 +20,10 @@ public class ReceiveDispatcher implements Runnable {
 	
 	void killThread() {
 		run = false;
+	}
+	
+	void registerHandler(Registerable registerable) {
+		registered.add(registerable);
 	}
 
 	@Override
@@ -50,6 +53,14 @@ public class ReceiveDispatcher implements Runnable {
 			        System.out.println("SENDING ACK : " + m);
 			        System.out.println("TO : " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
 			        socket.send(ack);
+			        
+			        for(Host host : parser.hosts()) {
+			        	if(host.getIp().contentEquals(packet.getAddress().toString().substring(1)) && host.getPort() == packet.getPort()) {
+					        for(Registerable reg : registered)
+					        	reg.handleMessage(host.getId(), tokens[0].trim());
+					        break;
+			        	}
+			        }
 		        }
 				Thread.sleep(100);
 			} catch(Exception e) {

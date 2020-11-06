@@ -5,16 +5,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
@@ -108,16 +100,14 @@ public class Main {
         coordinator.waitOnBarrier();
 
         System.out.println("Broadcasting messages...");
-        System.out.println("Starting best effort broadcast of " + numberOfMessages + " messages");
-        for(int i = 0 ; i < numberOfMessages ; i++) {
-        	for(int id : links.keySet()) {
-        		if(id == parser.myId())
-        			continue;
-        		PerfectLink link = links.get(id);
-        		if(!link.send("BROADCAST : " + Integer.toString(i)))
-        			System.out.println("LINK " + id + " DOWN");
-        	}
+        System.out.println("Starting reliable broadcast of " + numberOfMessages + " messages");
+        
+        ReliableBroadcast engine = new ReliableBroadcast(links, parser);
+        for(int i = 1 ; i <= numberOfMessages ; i++) {
+        	Logger.log.add("b " + Integer.toString(i));
+        	engine.broadcast(Integer.toString(i));
         }
+        	
 
         System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();

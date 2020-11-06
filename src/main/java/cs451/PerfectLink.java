@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Base64;
 
 public class PerfectLink {
 	private DatagramSocket socket;
@@ -39,6 +36,7 @@ public class PerfectLink {
     	
     	String message = m + "§" + Integer.toString(sequence);
     	System.out.println("SENDING MESSAGE :" + message);
+    	System.out.println("TO " + distantIP.getHostAddress() + " : " + distantPort);
     	
     	try {
     		DatagramPacket payload = new DatagramPacket(message.getBytes(), message.getBytes().length, distantIP, distantPort);
@@ -46,7 +44,6 @@ public class PerfectLink {
 				socket.send(payload);
 				for(int j = 0 ; j < 5 ; j++) {
 					synchronized(this) {
-						System.out.println("ACK " + ack);
 						if(ack < sequence)
 					    	this.wait(200);
 						else {
