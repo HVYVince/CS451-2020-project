@@ -16,6 +16,7 @@ public class ReceiveDispatcher implements Runnable {
 		this.socket = socket;
 		this.parser = parser;
 		this.links = links;
+		registered = new ArrayList<>();
 	}
 	
 	void killThread() {
@@ -56,7 +57,7 @@ public class ReceiveDispatcher implements Runnable {
 			        
 			        for(Host host : parser.hosts()) {
 			        	if(host.getIp().contentEquals(packet.getAddress().toString().substring(1)) && host.getPort() == packet.getPort()) {
-					        for(Registerable reg : registered)
+			        		for(Registerable reg : registered)
 					        	reg.handleMessage(host.getId(), tokens[0].trim());
 					        break;
 			        	}

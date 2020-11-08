@@ -31,6 +31,8 @@ public class Main {
         } catch(Exception e) {
         	return;
         }
+        
+        System.exit(0);
     }
 
     private static void initSignalHandlers() {
@@ -69,7 +71,10 @@ public class Main {
         for(int i = 0 ; i < parser.hosts().size() ; i++) {
         	if(parser.hosts().get(i).getId() == parser.myId())
         		continue;
-        	links.put(parser.hosts().get(i).getId(), new PerfectLink(socket, parser.hosts().get(i).getIp(), parser.hosts().get(i).getPort()));
+        	PerfectLink link = new PerfectLink(socket, parser.hosts().get(i).getIp(), parser.hosts().get(i).getPort());
+        	links.put(parser.hosts().get(i).getId(), link);
+        	Thread linkThread = new Thread(link);
+        	linkThread.start();
         }
         
         System.out.println("List of hosts is:");
@@ -91,7 +96,9 @@ public class Main {
         }
 
         Coordinator coordinator = new Coordinator(parser.myId(), parser.barrierIp(), parser.barrierPort(), parser.signalIp(), parser.signalPort());
+        ReliableBroadcast engine = new ReliableBroadcast(links, parser);
         dispatcher = new ReceiveDispatcher(socket, parser, links);
+        dispatcher.registerHandler(engine);
         Thread dispatcherThread = new Thread(dispatcher);
         dispatcherThread.start();
         outputPath = parser.output();
@@ -102,13 +109,11 @@ public class Main {
         System.out.println("Broadcasting messages...");
         System.out.println("Starting reliable broadcast of " + numberOfMessages + " messages");
         
-        ReliableBroadcast engine = new ReliableBroadcast(links, parser);
         for(int i = 1 ; i <= numberOfMessages ; i++) {
         	Logger.log.add("b " + Integer.toString(i));
         	engine.broadcast(Integer.toString(i));
         }
         	
-
         System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();
 
