@@ -3,10 +3,11 @@ package cs451;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ReliableBroadcast implements Registerable {
+public class ReliableBroadcast implements Registerable, Broadcast {
 	ArrayList<String> delivered = new ArrayList<>();
 	Parser parser;
 	HashMap<Integer, PerfectLink> links;
+	Broadcast upper = null;
 	
 	public ReliableBroadcast(HashMap<Integer, PerfectLink> links, Parser parser) {
 		this.links = links;
@@ -25,7 +26,10 @@ public class ReliableBroadcast implements Registerable {
     }
 	
 	public void deliver(int from, String m) {
-		Logger.log.add("d " + Integer.toString(from) + " " + m);
+		if(upper == null)
+			Logger.log.add("d " + Integer.toString(from) + " " + m);
+		else
+			upper.deliver(from, m);
 	}
 
 	@Override
@@ -58,5 +62,10 @@ public class ReliableBroadcast implements Registerable {
 				break;
 			}
 		}
+	}
+
+	@Override
+	public void registerBroadcast(Broadcast upper) {
+		this.upper = upper;
 	}
 }

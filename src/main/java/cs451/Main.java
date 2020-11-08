@@ -12,12 +12,14 @@ import java.util.HashMap;
 public class Main {
 	private static ReceiveDispatcher dispatcher;
 	private static String outputPath;
+	private static DatagramSocket socket;
 	
     private static void handleSignal() {
         //immediately stop network packet processing
         System.out.println("Immediately stopping network packet processing.");
         
         dispatcher.killThread();
+        socket.close();
 
         //write/flush output file if necessary
         System.out.println("Writing output.");
@@ -65,7 +67,7 @@ public class Main {
                 myPort = host.getPort();
         	}
         }
-        DatagramSocket socket = new DatagramSocket(myPort, myIP);
+        socket = new DatagramSocket(myPort, myIP);
         
         HashMap<Integer, PerfectLink> links = new HashMap<>();
         for(int i = 0 ; i < parser.hosts().size() ; i++) {
@@ -96,7 +98,7 @@ public class Main {
         }
 
         Coordinator coordinator = new Coordinator(parser.myId(), parser.barrierIp(), parser.barrierPort(), parser.signalIp(), parser.signalPort());
-        ReliableBroadcast engine = new ReliableBroadcast(links, parser);
+        FIFOBroadcast engine = new FIFOBroadcast(links, parser);
         dispatcher = new ReceiveDispatcher(socket, parser, links);
         dispatcher.registerHandler(engine);
         Thread dispatcherThread = new Thread(dispatcher);

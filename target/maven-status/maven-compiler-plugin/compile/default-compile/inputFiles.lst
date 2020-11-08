@@ -5,10 +5,12 @@
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/Main.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/Registerable.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/BarrierParser.java
+/home/vince/Documents/Distributed/Java/src/main/java/cs451/Broadcast.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/IdParser.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/PerfectLink.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/OutputParser.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/SignalParser.java
+/home/vince/Documents/Distributed/Java/src/main/java/cs451/FIFOBroadcast.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/Logger.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/ReliableBroadcast.java
 /home/vince/Documents/Distributed/Java/src/main/java/cs451/ConfigParser.java
