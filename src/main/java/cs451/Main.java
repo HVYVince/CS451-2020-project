@@ -34,7 +34,7 @@ public class Main {
         	return;
         }
         
-        System.exit(0);
+        //System.exit(0);
     }
 
     private static void initSignalHandlers() {
