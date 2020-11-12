@@ -22,7 +22,7 @@ public class ReliableBroadcast implements Registerable, Broadcast {
     		link.send(m);
     	}
     	deliver(parser.myId(), m);
-    	delivered.add(Integer.toString(parser.myId()) + ":" + m + ":" + parser.myId());
+    	delivered.add(Integer.toString(parser.myId()) + ":" + m);
     }
 	
 	public void deliver(int from, String m) {
@@ -34,17 +34,17 @@ public class ReliableBroadcast implements Registerable, Broadcast {
 
 	@Override
 	public void handleMessage(int from, String m, String origin) {
-		if(delivered.contains(Integer.toString(from) + ":" + m + ":" + origin))
+		if(delivered.contains(origin + ":" + m))
 			return;
 		
 	    new Thread(() -> linkSend(from, m, origin)).start();
 		deliver(Integer.parseInt(origin), m);
-		delivered.add(Integer.toString(from) + ":" + m + ":" + origin);
+		delivered.add(origin + ":" + m);
 	}
 	
 	public void linkSend(int from, String m, String origin) {
 		for(Host host : parser.hosts()) {
-			if(host.getId() == from || host.getId() == Integer.parseInt(origin))
+			if(host.getId() == from || host.getId() == Integer.parseInt(origin) || host.getId() == parser.myId())
 				continue;
 			PerfectLink link = links.get(host.getId());
 			while(link == null) {
