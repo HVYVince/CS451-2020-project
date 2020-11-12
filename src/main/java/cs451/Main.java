@@ -73,7 +73,7 @@ public class Main {
         for(int i = 0 ; i < parser.hosts().size() ; i++) {
         	if(parser.hosts().get(i).getId() == parser.myId())
         		continue;
-        	PerfectLink link = new PerfectLink(socket, parser.hosts().get(i).getIp(), parser.hosts().get(i).getPort());
+        	PerfectLink link = new PerfectLink(socket, parser.hosts().get(i).getIp(), parser.hosts().get(i).getPort(), parser.myId());
         	links.put(parser.hosts().get(i).getId(), link);
         	Thread linkThread = new Thread(link);
         	linkThread.start();
@@ -115,7 +115,7 @@ public class Main {
         	Logger.log.add("b " + Integer.toString(i));
         	engine.broadcast(Integer.toString(i));
         }
-        	
+        
         System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();
 

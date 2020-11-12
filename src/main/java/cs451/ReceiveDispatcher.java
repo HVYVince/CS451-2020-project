@@ -49,7 +49,7 @@ public class ReceiveDispatcher implements Runnable {
 		        	}
 		        }
 		        else {
-		        	String m = "ACK§" + tokens[1];
+		        	String m = "ACK§" + tokens[1].trim();
 			        DatagramPacket ack = new DatagramPacket(m.getBytes(), m.getBytes().length, packet.getAddress(), packet.getPort());
 			        System.out.println("SENDING ACK : " + m);
 			        System.out.println("TO : " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
@@ -58,7 +58,7 @@ public class ReceiveDispatcher implements Runnable {
 			        for(Host host : parser.hosts()) {
 			        	if(host.getIp().contentEquals(packet.getAddress().toString().substring(1)) && host.getPort() == packet.getPort()) {
 			        		for(Registerable reg : registered)
-					        	reg.handleMessage(host.getId(), tokens[0].trim());
+					        	reg.handleMessage(host.getId(), tokens[0].trim(), tokens[2].trim());
 					        break;
 			        	}
 			        }

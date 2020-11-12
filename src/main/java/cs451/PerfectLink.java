@@ -12,16 +12,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class PerfectLink implements Runnable {
 	private DatagramSocket socket;
 	private InetAddress distantIP;
+	private int myId = 0;
 	private int distantPort = 0;
 	private int sequence = 0;
 	private volatile int ack = -1;
 	private boolean functional = true;
 	private ConcurrentLinkedQueue<String> buffer = new ConcurrentLinkedQueue<>();
 
-    public PerfectLink(DatagramSocket socket, String distantIP, int distantPort) throws UnknownHostException {
+    public PerfectLink(DatagramSocket socket, String distantIP, int distantPort, int myId) throws UnknownHostException {
     	this.socket = socket;
     	this.distantIP = InetAddress.getByName(distantIP);
     	this.distantPort = distantPort;
+    	this.myId = myId;
     	functional = true;
     }
     
@@ -37,6 +39,10 @@ public class PerfectLink implements Runnable {
     public boolean send(String m) {
 		buffer.offer(m);
     	return functional;
+    }
+    
+    public boolean send(String m, String origin) {
+    	return send(m + "§" + origin);
     }
 
 	@Override
@@ -55,19 +61,24 @@ public class PerfectLink implements Runnable {
 					}
 				}
 			}
-	    	String message = m + "§" + Integer.toString(sequence);
+			String[] tokens = m.split("§");
+	    	String message = null;
+	    	if(tokens.length == 2)
+	    		message = tokens[0].trim() + "§" + Integer.toString(sequence) + "§" + tokens[1].trim();
+	    	else
+	    		message = m + "§" + Integer.toString(sequence) + "§" + Integer.toString(myId);
 	    	System.out.println("SENDING MESSAGE :" + message);
 	    	System.out.println("TO " + distantIP.getHostAddress() + " : " + distantPort);
 	    	
 	    	try {
 	    		DatagramPacket payload = new DatagramPacket(message.getBytes(), message.getBytes().length, distantIP, distantPort);
 				boolean sent = false;
-	    		for(int i = 0 ; i < 5 ; i++) {
+	    		for(int i = 0 ; i < 10 ; i++) {
 					socket.send(payload);
-					for(int j = 0 ; j < 5 ; j++) {
+					for(int j = 0 ; j < 10 ; j++) {
 						synchronized(this) {
 							if(ack < sequence)
-						    	this.wait(200);
+						    	this.wait(100);
 							else {
 								sequence++;
 								sent = true;

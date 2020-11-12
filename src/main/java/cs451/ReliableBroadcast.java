@@ -22,7 +22,7 @@ public class ReliableBroadcast implements Registerable, Broadcast {
     		link.send(m);
     	}
     	deliver(parser.myId(), m);
-    	delivered.add(Integer.toString(parser.myId()) + ":" + m);
+    	delivered.add(Integer.toString(parser.myId()) + ":" + m + ":" + parser.myId());
     }
 	
 	public void deliver(int from, String m) {
@@ -33,34 +33,34 @@ public class ReliableBroadcast implements Registerable, Broadcast {
 	}
 
 	@Override
-	public void handleMessage(int from, String m) {
-		if(delivered.contains(Integer.toString(from) + ":" + m))
+	public void handleMessage(int from, String m, String origin) {
+		if(delivered.contains(Integer.toString(from) + ":" + m + ":" + origin))
 			return;
 		
-	    new Thread(() -> linkSend(from, m)).start();
-		deliver(from, m);
-		delivered.add(Integer.toString(from) + ":" + m);
+	    new Thread(() -> linkSend(from, m, origin)).start();
+		deliver(Integer.parseInt(origin), m);
+		delivered.add(Integer.toString(from) + ":" + m + ":" + origin);
 	}
 	
-	public void linkSend(int from, String m) {
+	public void linkSend(int from, String m, String origin) {
 		for(Host host : parser.hosts()) {
-			if(host.getId() == from || host.getId() == parser.myId()) {
-				PerfectLink link = links.get(host.getId());
-				while(link == null) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						continue;
-					}
-					link = links.get(host.getId());
+			if(host.getId() == from || host.getId() == Integer.parseInt(origin))
+				continue;
+			PerfectLink link = links.get(host.getId());
+			while(link == null) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					continue;
 				}
-				PerfectLink l = link;
-				synchronized(l) {
-					l.send(m);
-					l.notify();
-				}
-				break;
+				link = links.get(host.getId());
 			}
+			//PerfectLink l = link;
+			synchronized(link) {
+				link.send(m, origin);
+				link.notify();
+			}
+			break;
 		}
 	}
 
