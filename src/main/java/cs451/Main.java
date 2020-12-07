@@ -89,16 +89,35 @@ public class Main {
         System.out.println("Output: " + parser.output());
         // if config is defined; always check before parser.config()
         int numberOfMessages = 0;
+        boolean[] dependsOn = new boolean[parser.hosts().size()];
+        for(int i = 0 ; i < dependsOn.length ; i++)
+        	dependsOn[i] = false;
         if (parser.hasConfig()) {
             System.out.println("Config: " + parser.config());
             
             BufferedReader reader = new BufferedReader(new FileReader(new File(parser.config())));
             numberOfMessages = Integer.parseInt(reader.readLine(), 10);
+            for(int i = 0 ; i < dependsOn.length ; i++) {
+            	String[] tokens = reader.readLine().split(" ");
+            	if(Integer.parseInt(tokens[0].trim(), 10) != parser.myId())
+            		continue;
+            	for(int j = 1 ; j < tokens.length ; j++) {
+            		if(tokens[j].trim().isEmpty())
+            			continue;
+            		int token = Integer.parseInt(tokens[j].trim(), 10);
+            		dependsOn[token - 1] = true;
+            	}
+            }
+            dependsOn[parser.myId() - 1] = true;
             reader.close();
         }
+        
+        System.out.println("DEPENDS ON ");
+        for(int i = 0 ; i < dependsOn.length ; i++)
+        	System.out.println(dependsOn[i]);
 
         Coordinator coordinator = new Coordinator(parser.myId(), parser.barrierIp(), parser.barrierPort(), parser.signalIp(), parser.signalPort());
-        FIFOBroadcast engine = new FIFOBroadcast(links, parser);
+        CausalBroadcast engine = new CausalBroadcast(links, parser, numberOfMessages, dependsOn);
         dispatcher = new ReceiveDispatcher(socket, parser, links);
         dispatcher.registerHandler(engine);
         Thread dispatcherThread = new Thread(dispatcher);
@@ -112,7 +131,7 @@ public class Main {
         System.out.println("Starting reliable broadcast of " + numberOfMessages + " messages");
         
         for(int i = 1 ; i <= numberOfMessages ; i++) {
-        	Logger.log.add("b " + Integer.toString(i));
+        	//Thread.sleep(100);
         	engine.broadcast(Integer.toString(i));
         }
         
